@@ -22,11 +22,11 @@ la = 1/5*E
 
 # creature parameters
 max_segs = 8
-head_width = 10
-head_height = 10
+head_width = 20
+head_height = 20
 seg_width = 12
-min_segh = 1
-max_segh = 10
+min_segh = 5
+max_segh = 20
 origin_x = 40
 origin_y = 5
 #
@@ -45,15 +45,11 @@ scalar = lambda: ti.field(dtype=real)
 vec = lambda: ti.Vector.field(dim, dtype=real)
 mat = lambda: ti.Matrix.field(dim, dim, dtype=real)
 
-num_segs = 3 # random.randint(1,max_segs)
+num_segs = 5 # random.randint(1,max_segs)
 seg_heights = ti.field(dtype=real, shape=num_segs, needs_grad=True)
-# for seg in range(num_segs):
-seg_heights[0] = random.randint(min_segh, int(max_segh))
-max_segh = seg_heights[0]
-seg_heights[1] = random.randint(min_segh, int(max_segh))
-max_segh = seg_heights[1]
-seg_heights[2] = random.randint(min_segh, int(max_segh))
-max_segh = seg_heights[2]
+for seg in range(num_segs):
+    seg_heights[seg] = random.randint(min_segh, int(max_segh))
+
 x = ti.Vector.field(dim,
                     dtype=real,
                     shape=(max_steps, n_particles),
@@ -171,10 +167,11 @@ def compute_loss():
     loss[None] = 0.5 * (dist[0] + dist[1])
 
     # reward smoothness
-    # for seg in range(num_segs - 1):
-    loss[None] += 0.1 * (seg_heights[0] - seg_heights[1])**2
-    loss[None] += 0.1 * (seg_heights[1] - seg_heights[2])**2
-
+    loss_ht_wt = 0.12
+    loss[None] += loss_ht_wt * (seg_heights[0] - seg_heights[1])**2
+    loss[None] += loss_ht_wt * (seg_heights[2] - seg_heights[3])**2
+    loss[None] += loss_ht_wt * (seg_heights[3] - seg_heights[4])**2
+    loss[None] += loss_ht_wt * (seg_heights[1] - seg_heights[2])**2
 
 def substep(s):
     p2g(s)
@@ -208,8 +205,6 @@ def init_creature():
             for j in range(seg_height):
                 x[0, particle_idx] = [dx * (i * 1 + start_x), dx * (j * y_dens + start_y)]
                 particle_idx += 1
-        # max_segh = seg_height
-        min_segh = int(0.5*max_segh)
         start_x += seg_width
 
     # construct tail / left appendage

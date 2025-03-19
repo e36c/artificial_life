@@ -1,8 +1,3 @@
 # Lab 2
 
-I modified diffmpm_simple to generate a snake with several random parameters:
-- Random segment width and particle density
-- Random number of segments
-- Random appearance of a tail or not
-
-This meant I primarily altered the portions of the code that set up the initial positions of the mpmparticles.
+I modified diffmpm_simple to generate a snake with a number of body segments, each with a certain height. The height of each of them is optimized according to a cost function that rewards smoothness, causing the snake to gradually develop segment heights that are similar in height. The other part of the cost function is original to the example code, rewarding creatures that use their initial velocity to reach towards the target. I have zeroed initial horizontal velocity so that the snake's vertical velocity as well as its segment heights are the only things that may propel it sideways towards the target. Additionally, because the target was a moderate distance above the snake, the segment heights not only tended towards being the same height, but also being as tall as possible, to bring the center of mass of the creature closer to the targetl; this was an inadvertent consequence of how I designed the cost function.
